@@ -1,70 +1,59 @@
-import React, { useEffect } from "react";
-import '../styles/result.css' ;
-import { Link } from "react-router-dom";
-import ResultTable from "./resultTable";
-import { useDispatch, useSelector } from "react-redux";
-import { resetAllAction } from "../redux/question_reducer";
-import { resetResultAction } from "../redux/result_reducer";
-import { attempts_Number, getMarks_Number, flagResult} from "../helper/helper";
+import React from 'react';
+import '../styles/result.css';
+import { Link } from 'react-router-dom';
+import ResultTable from './resultTable';
+import { useDispatch, useSelector } from 'react-redux';
+import { resetAllAction } from '../redux/question_reducer';
+import { resetResultAction } from '../redux/result_reducer';
 
+export default function Result() {
+    const dispatch = useDispatch();
 
-export default function Result(){
+    
+    const resultData = useSelector(state => state.result.result) || [];
+    
+    const lastResult = Array.isArray(resultData) && resultData.length > 0 
+        ? resultData[resultData.length - 1] 
+        : (resultData.score !== undefined ? resultData : {});
 
-    const dispatch= useDispatch()
-    const{questions: {queue,answers}, result :{result,userId}}= useSelector(state => state)
+    const score = lastResult?.score ?? 0;
+    const total = lastResult?.total ?? 5;
+    const percentage = lastResult?.percentage ?? (score / total) * 100;
+    const isPassed = percentage >= 50;
 
-    useEffect(()=> {
-        console.log(flag)
-    })
-    const totalMarks = queue.length*10;
-    const attempts= attempts_Number(result)
-    const getMarks = getMarks_Number(result,answers,10)
-    const flag= flagResult(totalMarks,getMarks)
-
-    function onRestart(){
-        dispatch(resetAllAction())
-        dispatch(resetResultAction())
+    function onRestart() {
+        dispatch(resetAllAction());
+        dispatch(resetResultAction());
     }
-    return(
-        <div className="container">
 
-             <h1 className="title">Quiz App</h1>
+    return (
+        <div className='container'>
+            <h1 className='title'>Quiz App</h1>
 
-             <div className="result">
-                <div className="flex">
-                    <span>Name:</span>
-                    <span className="Bold"> Anshul</span>
+            <div className='result flex-center'>
+                <div className='flex'>
+                    <span>Score Achieved : </span>
+                    <span className='bold'>{score} / {total}</span>
                 </div>
-                <div className="flex">
-                    <span>Total Marks: </span>
-                    <span className="Bold">{totalMarks || 0}</span>
+                <div className='flex'>
+                    <span>Percentage : </span>
+                    <span className='bold'>{percentage.toFixed(0)}%</span>
                 </div>
-                <div className="flex">
-                    <span>Total Questions: </span>
-                    <span className="Bold">{queue.length}</span>
+                <div className='flex'>
+                    <span>Quiz Result : </span>
+                    <span style={{ color : isPassed ? "#22c55e" : "#ff4a4a" }} className='bold'>
+                        {isPassed ? "Passed" : "Failed"}
+                    </span>
                 </div>
-                <div className="flex">
-                    <span>Question attempted: </span>
-                    <span className="Bold">{attempts ||0}</span>
-                </div>
-                <div className="flex">
-                    <span>Final Marks: </span>
-                    <span className="Bold">{getMarks ||0 }</span>
-                </div>
-                <div className="flex">
-                    <span>Result: </span>
-                    <span style={{color:`${flag ? "#4fb95dff" : "#ff2a66" }`}} className="Bold">{flag? "Passed" : "Failed"}</span>
-                </div>
-             
-             </div>
+            </div>
 
-             <div className="start">
-                <Link className="btn" to={'/'} onClick={onRestart}>Reattempt</Link>
-             </div>
+            <div className="start">
+                <Link className='btn' to={'/'} onClick={onRestart}>Restart</Link>
+            </div>
 
-             <div>
-                <ResultTable></ResultTable>
-             </div>
+            <div className="container">
+                <ResultTable score={score} total={total} isPassed={isPassed} />
+            </div>
         </div>
-    )
+    );
 }

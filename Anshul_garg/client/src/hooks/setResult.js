@@ -1,17 +1,17 @@
-import * as Action from '../redux/result_reducer'
+import * as Action from '../redux/result_reducer';
 
-export const PushAnswer=(result) => async(dispatch) => {
+export const postServerData = (answersData) => async (dispatch) => {
     try {
-        await dispatch(Action.pushResultAction(result))
-    } catch (error) { 
-        console.log(error)
-    }
-}
-
-export const updateResult= (index) => async(dispatch)=> {
-    try {
-        dispatch(Action.updateResultAction(index))
+        const response = await fetch('http://localhost:8080/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(answersData)
+        });
+        const data = await response.json();
+        
+        
+        dispatch(Action.pushResultAction(data));
     } catch (error) {
-        console.log(error)
+        console.log(error);
     }
-}
+};

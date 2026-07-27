@@ -1,38 +1,37 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import data,{answers} from "../databse/data";
-import * as Action from '../redux/question_reducer'
+import * as Action from '../redux/question_reducer';
 
-export const useFetchQuestion= ()=>{
-    const dispatch = useDispatch();
-    const [getData,setGetData] = useState({isLoading:false, apiData:[], serverError:null });
+export const useFetchQuestion = () => {
+    const dispatch = useDispatch();   
+    const [getData, setGetData] = useState({ isLoading: false, apiData: [], serverError: null });
 
-        useEffect(() => {
-            setGetData(prev => ({...prev, isLoading:true}));
+    useEffect(() => {
+        setGetData(prev => ({ ...prev, isLoading: true }));
 
-            (async()=>{
-                try {
-                    let question = await data; 
+        (async () => {
+            try {
+                const response = await fetch('http://localhost:8080/questions');
+                const data = await response.json();
 
-                    if(question.length >0){
-                        setGetData(prev => ({...prev, isLoading:false}));
-                        setGetData(prev => ({...prev, apiData:question}));
-
-                        dispatch(Action.startExamAction({question, answers}))
-
-                    } else{
-                        throw new Error("No Question Available")
-                    }
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    setGetData(prev => ({ ...prev, isLoading: false, apiData: data }));
                     
-                } catch (error) {
-                    setGetData(prev => ({...prev, isLoading:false}));
-                    setGetData(prev => ({...prev, serverError:error}));
-                    
+                    dispatch(Action.startExamAction({ queue: data, answers: [] }));
+                } else {
+                    throw new Error("No Questions Available");
                 }
-            })();
-    },[dispatch]);
-    return [getData,setGetData]
-}
+            } catch (error) {
+                setGetData(prev => ({ ...prev, isLoading: false, serverError: error }));
+            }
+        })();
+    }, [dispatch]);
+
+    return [getData, setGetData];
+
+    
+};
 
 export const moveNextQuestion=()=> async(dispatch)=> {
     try {
@@ -48,5 +47,4 @@ export const movePrevQuestion=()=> async(dispatch)=> {
     } catch (error) {
         console.log(error)
     }
-
 }

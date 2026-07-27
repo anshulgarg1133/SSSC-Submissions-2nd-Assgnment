@@ -4,20 +4,21 @@ import cors from 'cors';
 import { config } from "dotenv";
 import router from "./router/route.js";
 
+config();
 const app=express();
 
 app.use(morgan('tiny'));
 app.use(cors());
 app.use(express.json());
-config();
+
 
 const PORT = process.env.PORT || 8080;
 
-app.use('/api',router)
+app.use('/',router);
 
 app.get('/', (req,res)=>{
     try {
-        res.json("Get Request")
+        res.json("Quiz App Backend Running")
     } catch (error) {
         res.json(error)
     }

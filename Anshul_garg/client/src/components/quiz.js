@@ -1,58 +1,70 @@
-import React, { useEffect, useState } from "react";
-import '../styles/quiz.css' ;
-import Questions from './questions.js' ;
+import React, { useState } from "react";
+import '../styles/quiz.css';
+import Questions from '../components/questions.js';
 import { moveNextQuestion, movePrevQuestion } from "../hooks/fetch_question.js";
-
-import {useSelector,useDispatch} from 'react-redux'
-import { PushAnswer } from "../hooks/setResult.js";
+import { useSelector, useDispatch } from 'react-redux';
+import { postServerData } from "../hooks/setResult.js";
 import { Navigate } from "react-router-dom";
 
-export default function Quiz(){
-    const[check,setChecked]= useState(undefined)
+export default function Quiz() {
+    const [userAnswers, setUserAnswers] = useState({});
+    const [submitted, setSubmitted] = useState(false);
 
-    const result = useSelector(state=>state.result.result);
-    const {queue,trace}= useSelector(state =>state.questions);
+    const { queue = [], trace = 0 } = useSelector(state => state.questions) || {};
+    const dispatch = useDispatch();
 
-    const dispatch= useDispatch()
-
-    function onNext(){
-        if(trace< queue.length){
-         dispatch(moveNextQuestion());
-         if(result.length<= trace){
-            dispatch(PushAnswer(check))
-         }
-        }
-        setChecked(undefined)
+    function onChecked(selectedLetter) {
+        setUserAnswers(prev => ({
+            ...prev,
+            [trace]: selectedLetter
+        }));
     }
-    function onPrev(){
-        if (trace>0){
-           dispatch(movePrevQuestion());
+
+    function onNext() {
+        if (trace < queue.length - 1) {
+            dispatch(moveNextQuestion());
+        } else {
+            onSubmit();
+        }
+    }
+
+    function onPrev() {
+        if (trace > 0) {
+            dispatch(movePrevQuestion());
         }  
     }
-    function onChecked(check){
-        console.log(check)
-        setChecked(check)
+
+    function onSubmit() {
+        const payload = queue.map((q, index) => ({
+            id: q.id,
+            selected: userAnswers[index] || ""
+        }));
+
+        dispatch(postServerData(payload));
+        setSubmitted(true);
     }
 
-    if(result.length && result.length>= queue.length){
-        return <Navigate to={'/result'} replace="true"></Navigate>
-
+    if (submitted) {
+        return <Navigate to={'/result'} replace={true} />;
     }
 
-    return(
+    
+
+    return (
         <div className="container">
-           <h1 className="title">Quiz App</h1>
+            <h1 className="title">Quiz App</h1>
 
-           <Questions onChecked={onChecked}/>
+            <Questions onChecked={onChecked} selectedAnswers={userAnswers} />
 
-
-           <div className="grid">
-            {trace > 0 ? <button className="prev btn" onClick={onPrev}>Prev</button> :<div></div>}
-            <button className="next btn" onClick={onNext} >Next</button>
-
-           </div>
-
-
+            <div className="grid">
+                {trace > 0 ? (
+                    <button className="prev btn" onClick={onPrev}>Prev</button>
+                ) : <div />}
+                
+                <button className="next btn" onClick={onNext}>
+                    {trace === queue.length - 1 ? "Submit" : "Next"}
+                </button>
+            </div>
         </div>
-    )
+    );
 }

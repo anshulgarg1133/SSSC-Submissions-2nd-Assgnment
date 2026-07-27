@@ -1,30 +1,25 @@
 import React from 'react';
-import '../styles/result.css' ;
+import '../styles/result.css'
 
-export default function ResultTable(){
-    return(
+export default function ResultTable({ score = 0, total = 5, isPassed = false }) {
+    return (
         <div>
             <table>
                 <thead className='table-header'>
                     <tr className='table-row'>
-                        <td>Name</td>
-                        <td>Attempts</td>
-                        <td>Final Marks</td>
-                        <td>Result</td>
+                        <th>Total Questions</th>
+                        <th>Score</th>
+                        <th>Result</th>
                     </tr>
-
                 </thead>
-                <tbody >
+                <tbody>
                     <tr className='table-body'>
-                        <td>Anshul Garg</td>
-                        <td>8</td>
-                        <td>80</td>
-                        <td>Passed</td>
+                        <td>{total}</td>
+                        <td>{score}</td>
+                        <td>{isPassed ? "Passed" : "Failed"}</td>
                     </tr>
-
                 </tbody>
             </table>
         </div>
-    )
-
+    );
 }

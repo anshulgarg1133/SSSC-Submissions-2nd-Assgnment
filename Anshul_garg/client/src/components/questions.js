@@ -1,58 +1,57 @@
-import React, { useEffect, useState } from "react";
-import '../styles/questions.css' ;
-import { useDispatch, useSelector } from "react-redux";
+import React from "react";
+import '../styles/questions.css';
+import { useSelector } from "react-redux"; // Must be from react-redux
+import { useFetchQuestion } from "../hooks/fetch_question.js"; // Must have curly brackets
 
-//custom hook
-import { useFetchQuestion } from "../hooks/fetch_question";
+export default function Questions({ onChecked, selectedAnswers = {} }) {
+   const { queue, trace } = useSelector(state => state.questions);
+   
+   // Destructure the custom hook safely
+   const [fetchData] = useFetchQuestion();
+   const isLoading = fetchData?.isLoading;
+   const serverError = fetchData?.serverError;
 
-import { updateResult } from "../hooks/setResult";
+   const currentQuestion = queue ? queue[trace] : undefined;
+   const optionLetters = ["A", "B", "C", "D"];
 
-export default function Questions({onChecked}){
-   const[checked,setChecked]= useState(undefined)
-   const {trace}= useSelector(state => state.questions);
-   const result = useSelector(state => state.result.result);
-   const [{isLoading, apiData, serverError}]= useFetchQuestion()
-   useSelector(state => console.log(state));
+   function onSelect(i) {
+       const selectedLetter = optionLetters[i];
+       onChecked(selectedLetter);
+   }
 
-    const questions = useSelector(state =>state.questions.queue[state.questions.trace])
+   if (isLoading) return <h3 className="ques">Loading Questions...</h3>;
+   if (serverError) return <h3 className="ques">{serverError.message || "Unknown error"}</h3>;
+   if (!currentQuestion) return <h3 className="ques">No Question Available</h3>;
 
-    const dispatch= useDispatch()
+   const currentSelection = selectedAnswers[trace];
 
-    useEffect(()=> {
-        dispatch(updateResult({trace, checked}))
-    }, [checked])
+   return (
+       <div className="questions">
+           <h2 className="ques">{currentQuestion?.question}</h2>
+           <ul key={currentQuestion?.id}>
+               {
+                   currentQuestion?.options.map((q, i) => {
+                       const letter = optionLetters[i];
+                       const isChecked = currentSelection === letter;
 
-    function onSelect(i){
-        onChecked(i)
-        setChecked(i)
-        dispatch(updateResult({trace,checked}))
-    }
-
-    if(isLoading) return <h3 className="ques">isLoading</h3>
-    if(serverError) return <h3 className="ques">{serverError || "unknown error"}</h3>
-
-    return(
-        <div className="questions">
-            <h2 className="ques">{questions?.question}</h2>
-
-            <ul key={questions?.id}>
-                {
-                    questions?.options.map((q,i)=> (
-                        <li key={i}>
-                            <input 
-                                type="radio"
-                                value={false}
-                                name="options"
-                                id={`q${i}-option`}
-                                onChange={() => onSelect(i)}
-                            />
-                            <label className="text" htmlFor={`q${i}-option`}>{q}</label>
-                            <div className={`check ${result[trace]== i ? "checked" :"" } `}></div>
-                        </li>
-                    ))
-                }
-            </ul>
-
-        </div>
-    )
+                       return (
+                           <li key={i}>
+                               <input 
+                                   type="radio"
+                                   name="options"
+                                   id={`q${i}-option`}
+                                   checked={isChecked}
+                                   onChange={() => onSelect(i)}
+                               />
+                               <label className="text" htmlFor={`q${i}-option`}>
+                                   {q}
+                               </label>
+                               <div className={`check ${isChecked ? "checked" : ""}`}></div>
+                           </li>
+                       );
+                   })
+               }
+           </ul>
+       </div>
+   );
 }
