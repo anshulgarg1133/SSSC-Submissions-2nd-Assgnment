@@ -1,7 +1,7 @@
 import { Router } from "express";
 const router= Router()
 
-import * as controller from '../ controllers/controller.js';
+import * as controller from '../controllers/controller.js';
 
 
 router.get('/questions', controller.getQuestions);

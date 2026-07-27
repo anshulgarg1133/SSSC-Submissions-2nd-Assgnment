@@ -1,7 +1,7 @@
 import React from "react";
 import '../styles/questions.css';
-import { useSelector } from "react-redux"; // Must be from react-redux
-import { useFetchQuestion } from "../hooks/fetch_question.js"; // Must have curly brackets
+import { useSelector } from "react-redux"; 
+import { useFetchQuestion } from "../hooks/fetch_question.js"; 
 
 export default function Questions({ onChecked, selectedAnswers = {} }) {
    const { queue, trace } = useSelector(state => state.questions);

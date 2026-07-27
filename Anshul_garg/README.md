@@ -20,9 +20,7 @@ quiz-app/
 │   ├── controllers/
 │   │   └── controller.js       # Route handlers (Server-side grading & hiding answers)
 │   ├── router/
-│   │   └── route.js            # Express API routes (/questions, /submit)
-│   ├── database/
-│   │   └── data.js             # Question dataset (5 questions)
+│   │   └── route.js            # Express API routes (/questions, /submit)     
 │   ├── package.json
 │   └── server.js               # Entry point (Runs on port 8080)
 │
